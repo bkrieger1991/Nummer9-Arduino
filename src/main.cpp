@@ -4,21 +4,34 @@
 #include <pRNG.h>
 
 // Pin Definitions
+// DFPlayer Busy Pin: signals whether a track is played or not
 #define BUSY_PIN 8
+// DFPlayer TX (transmit) pin, used for serial communication
 #define PLAYER_TX_PIN 9
+// DFPlayer RX (receive) pin, used for serial communication
 #define PLAYER_RX_PIN 10
+// PIR Motion sensor signal pin
 #define SENSOR_PIN 11
+// Debug pin (LOW = no debugging)
 #define DEBUG_PIN 12
+// Status LED pin
 #define LED_PIN 13
 
-// Settings
-#define PLAYER_VOLUME 20
+// === Settings ===
+// DFPlayer settings
+#define PLAYER_VOLUME 5
 #define PLAYER_TIMEOUT 2000
+// Time between the end of one track and the start of another
 #define TRACK_DELAY 5000
+// Delay at the end of each loop
+#define LOOP_DELAY 800
+// Delay after starting a track with next()
+#define PLAYER_PLAY_DELAY 500
+// Setup delay after initializing
+#define INIT_DELAY 2000
 
 // millis() since playback was finished
 unsigned long lastTrackFinished = 0;
-int folderCount = 0;
 bool isPlaying = false;
 bool debug = false;
 
@@ -60,9 +73,8 @@ void setup() {
   dfPlayer.EQ(DFPLAYER_EQ_JAZZ);
   dfPlayer.setTimeOut(PLAYER_TIMEOUT);
   
-  delay(2000);
-  folderCount = dfPlayer.readFileCounts();
-  print("found " + String(folderCount) + " audio files...");
+  delay(INIT_DELAY);
+  
   lastTrackFinished = millis();
   println("Done.");
 }
@@ -94,7 +106,7 @@ void loop() {
       print("Play track...");
       isPlaying = true;
       dfPlayer.next();
-      delay(500);
+      delay(PLAYER_PLAY_DELAY);
     } else if(isPlaying) {
       print("Still playing...");
     } else if(isInTrackDelay) {
@@ -105,7 +117,7 @@ void loop() {
   }
 
   println("Loop done.");
-  delay(800);
+  delay(LOOP_DELAY);
 }
 
 void print(String m) {
